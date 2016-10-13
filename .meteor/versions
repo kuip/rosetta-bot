@@ -32,6 +32,8 @@ http@1.1.8
 id-map@1.0.8
 insecure@1.0.7
 jquery@1.11.9
+kuip:subject-dbtools@0.0.1
+kuip:subject-snomed-dbload@0.0.1
 launch-screen@1.0.12
 livedata@1.0.18
 logging@1.1.15

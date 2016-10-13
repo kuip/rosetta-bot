@@ -10,10 +10,15 @@ Package.describe({
   documentation: 'README.md'
 });
 
+
+Npm.depends({
+  "papaparse": "4.1.2"
+});
+
 Package.onUse(function(api) {
   api.versionsFrom('1.4.1');
   api.use('ecmascript');
-  api.mainModule('subject-snomed-dbload.js');
+  api.mainModule('main.js', 'server');
 });
 
 Package.onTest(function(api) {

@@ -11,14 +11,20 @@ Package.describe({
 });
 
 Npm.depends({
-  "jugglingdb": "2.0.0-rc8",
-  "jugglingdb-mysql": "0.2.3",
+  "papaparse": "4.1.2",
+  //"jugglingdb": "2.0.0-rc8",
+  //"jugglingdb-arango": "1.0.0",
+  //"jugglingdb-mysql": "0.2.3"
 });
 
 Package.onUse(function(api) {
   api.versionsFrom('1.4.1');
-  api.use('ecmascript');
-  api.mainModule('subject-dbtools.js');
+  api.use([
+    'ecmascript',
+    'kadira:flow-router',
+    'kadira:blaze-layout'
+  ]);
+  api.mainModule('main.js');
 });
 
 Package.onTest(function(api) {
