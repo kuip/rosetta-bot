@@ -17,6 +17,100 @@ let removeCollections = (name) => {
         });
     });
 }
+
+let Tools = {
+    chunkData: (data, no) => {
+        let res = [], i,
+            max = Math.floor(data.length / no);
+
+        for(i=0; i < max; i++) {
+            res[i] = data.splice(0, no);
+        }
+        res[i] = data;
+        return res;
+    },
+
+    jsImport: (collectionName, filePath, opts) => {
+        let { db, sep, chunk } = opts;
+        // Get array of documents as objets
+        let parsed = Baby.parseFiles(filePath, {
+            header: true,
+            delimiter: '\t',
+        });
+
+        // Chunk data, so we can better log the process
+        let data = chunkData(parsed.data, chunk);
+        console.log(`length ${ data.length }`);
+        //console.log(collectionName)
+
+        let coll = db.collection(collectionName);
+        coll.create()
+            .then(() => {
+                data.forEach((ch, n) => {
+                    let res = coll.import(ch, {details: true, complete: true}, (error, result) => {
+                        if(error)
+                            console.log(error);
+                        else {
+                            console.log(JSON.stringify(result));
+                            console.log(`------ imported chunk ${ n } of ${ ch.length } from ${ collectionName } - total of ${ data.length } chunks`);
+                        }
+                    });
+                });
+            });
+    },
+
+    bashImport: (collectionName, filePath, opts) => {
+        let { db, sep } = opts;
+
+        let command = `arangoimp --file ${ filePath } --type csv --separator ${ sep } --collection ${ collectionName } --create-collection true --server.database ${ db } --server.username ${ username } --server.password ${ password } --server.request-timeout 100000 --overwrite true`;
+
+        exec(command, (error, stdout, stderr) => {
+          if (error) {
+            console.error(`exec error: ${error}`);
+            return;
+          }
+          console.log(`stdout: ${stdout}---------------`);
+          console.log(`stderr: ${stderr}---------------`);
+        });
+    },
+
+    importData: (opts) => {
+        let { folder, way } = opts
+        let folders = fs.readdirSync(folder, 'utf8');
+
+        folders.forEach((f) => {
+            if(f.substring(0, 1) == '.')
+                return;
+
+            let files = fs.readdirSync(`${ folder }/${ f }/`, 'utf8');
+            files.forEach((file) => {
+                if(file.substring(0, 1) == '.')
+                    return;
+
+                let filePath = `${ folder }/${ f }/${ file }`,
+                    collectionName = `${ f }_${ file }`;
+
+                collectionName = collectionName
+                    .substring(0, collectionName.indexOf('.'))
+                    .replace('_', '');
+
+                // Remove wierd characters
+                for(let j=0; j < collectionName.length; j++) {
+                    if(collectionName.charCodeAt(j) > 127)
+                        collectionName = collectionName.substring(0, j) + collectionName.substring(j+1);
+                }
+                
+                // 64 bytes max for arango
+                collectionName = collectionName.substring(0, 62);
+
+                Tools[way+'Import'](collectionName, filePath, opts);
+            });
+        });
+    }
+}
+
+export default Tools;
+
 //console.log(Schema);
 
 //var schema = new Schema('arango', {

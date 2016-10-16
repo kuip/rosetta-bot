@@ -1,5 +1,16 @@
 import { Meteor } from 'meteor/meteor';
+import Tools from 'meteor/kuip:subject-dbtools';
 
-Meteor.startup(() => {
-  // code to run on server at startup
-});
+
+let base = process.env.PWD;
+let dataFolder = base.substring(0, base.lastIndexOf('/')) + '/snomed-data/';
+
+/*Tools.importData({
+	folder: dataFolder,
+	chunk: 1000,
+	db: 'snoini',
+	sep: "\"\\t\"",
+	way: 'bash'
+});*/
+
+
