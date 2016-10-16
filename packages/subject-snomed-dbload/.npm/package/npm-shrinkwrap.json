@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "papaparse": {
+      "version": "4.1.2",
+      "resolved": "https://registry.npmjs.org/papaparse/-/papaparse-4.1.2.tgz",
+      "from": "papaparse@4.1.2"
+    }
+  }
+}

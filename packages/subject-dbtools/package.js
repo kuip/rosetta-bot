@@ -11,9 +11,9 @@ Package.describe({
 });
 
 Npm.depends({
-  "papaparse": "4.1.2",
-  //"jugglingdb": "2.0.0-rc8",
-  //"jugglingdb-arango": "1.0.0",
+  "babyparse": "0.4.6",
+  "jugglingdb": "2.0.0-rc8",
+  "jugglingdb-arango": "1.0.0",
   //"jugglingdb-mysql": "0.2.3"
 });
 
