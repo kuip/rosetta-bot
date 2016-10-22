@@ -7,6 +7,7 @@ Rosetta-bot is using the [IHTSDO](http://www.ihtsdo.org/) medical terminology SN
 ## Crowdsourcing Translations
 
 An extension of this project is a web and mobile app for crowdsourcing translations:
+
 https://github.com/loredanacirstea/rosetta
 
 https://www.youtube.com/watch?v=zosqK7d60zE 
