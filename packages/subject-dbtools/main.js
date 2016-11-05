@@ -6,19 +6,8 @@ import fs from 'fs';
 import { exec } from 'child_process';
 import { username, password } from './credentials.js';
 
-let removeCollections = (name) => {
-    let db = new arango.Database('http://' + username + ':' + password + '@127.0.0.1:8529');
-    db.useDatabase(name);
 
-    db.collections()
-    .then(collections => {
-        collections.forEach(c => {
-            c.drop();
-        });
-    });
-}
-
-let Tools = {
+export default Tools = {
     chunkData: (data, no) => {
         let res = [], i,
             max = Math.floor(data.length / no);
@@ -62,7 +51,7 @@ let Tools = {
     bashImport: (collectionName, filePath, opts) => {
         let { db, sep } = opts;
 
-        let command = `arangoimp --file ${ filePath } --type csv --separator ${ sep } --collection ${ collectionName } --create-collection true --server.database ${ db } --server.username ${ username } --server.password ${ password } --server.request-timeout 100000 --overwrite true`;
+        let command = `arangoimp --file ${ filePath } --type csv --separator ${ sep } --collection ${ collectionName } --create-collection true --server.database ${ db } --server.username ${ username } --server.password ${ password } --server.request-timeout 100000 --overwrite true --progress true --batch-size 4000554432`;
 
         exec(command, (error, stdout, stderr) => {
           if (error) {
@@ -84,15 +73,26 @@ let Tools = {
 
             let files = fs.readdirSync(`${ folder }/${ f }/`, 'utf8');
             files.forEach((file) => {
+                // System files
                 if(file.substring(0, 1) == '.')
                     return;
 
-                let filePath = `${ folder }/${ f }/${ file }`,
-                    collectionName = `${ f }_${ file }`;
+                // Only load the terminology + language refsets
+                let languageRef = file.indexOf('anguage') > -1;
+                if(file.indexOf('sct') == -1 &&  !languageRef)
+                    return;
 
-                collectionName = collectionName
-                    .substring(0, collectionName.indexOf('.'))
-                    .replace('_', '');
+                let filePath = `${ folder }/${ f }/${ file }`,
+                    tempName = languageRef ? file.substring(file.indexOf('-')+1) : file.substring(file.indexOf('_')+1),
+                    collectionName = `${ f }_${ 
+                        (languageRef ? 'LanguageRefSet-' : '') +
+                        tempName.substring(0, tempName.indexOf('_')) 
+                    }`;
+
+                //collectionName = collectionName
+                    //.substring(0, collectionName.indexOf('.'))
+                    //.replace('_', '');
+
 
                 // Remove wierd characters
                 for(let j=0; j < collectionName.length; j++) {
@@ -106,10 +106,20 @@ let Tools = {
                 Tools[way+'Import'](collectionName, filePath, opts);
             });
         });
+    },
+    removeCollections: (name) => {
+        let db = new arango.Database('http://' + username + ':' + password + '@127.0.0.1:8529');
+        db.useDatabase(name);
+
+        db.collections()
+        .then(collections => {
+            collections.forEach(c => {
+                c.drop();
+            });
+        });
     }
 }
 
-export default Tools;
 
 //console.log(Schema);
 
