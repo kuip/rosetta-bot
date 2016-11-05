@@ -6,8 +6,27 @@ import fs from 'fs';
 import { exec } from 'child_process';
 import { username, password } from './credentials.js';
 
+let host = '127.0.0.1',
+    port = '8529';
 
 export default Tools = {
+    init: ({ name, host, port }) => {
+        this.nameI = name;
+        this.host = host;
+        this.port = port;
+
+        // Initialize db with initial snomed data
+        this.dbI = new arango.Database('http://' + username + ':' + password + `@${ host }:${ port }`);
+        this.dbI.useDatabase(name);
+
+        // This db will only contain active concepts and relations
+        this.nameIA = name + '_active';
+        this.dbIA = new arango.Database('http://' + username + ':' + password + `@${ host }:${ port }`);
+        this.dbIA.createDatabase(this.nameIA, [{ username: username }])
+            .then( info => {
+                this.dbIA.useDatabase()
+            })
+    },
     chunkData: (data, no) => {
         let res = [], i,
             max = Math.floor(data.length / no);
@@ -108,8 +127,7 @@ export default Tools = {
         });
     },
     removeCollections: (name) => {
-        let db = new arango.Database('http://' + username + ':' + password + '@127.0.0.1:8529');
-        db.useDatabase(name);
+        let db = this.dbI;
 
         db.collections()
         .then(collections => {
@@ -117,9 +135,19 @@ export default Tools = {
                 c.drop();
             });
         });
+    },
+    selectActive: ({ input, output }) => {
+        if(!input || !output) {
+            console.log('no input/output')
+            return;
+        }
+
+        let db = new arango.Database('http://' + username + ':' + password + `@${ host }:${ port }`);
+        db.useDatabase(name);
+        db.createDatabase(output);
+
     }
 }
-
 
 //console.log(Schema);
 
